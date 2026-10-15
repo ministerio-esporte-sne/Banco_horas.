@@ -1,0 +1,832 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1351b4">
+<meta name="description" content="Controle pessoal de horas e acompanhamento da meta de compensação.">
+<meta name="application-name" content="Controle de Horas">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Controle de Horas">
+
+
+
+<title>Controle de Horas — Ministério do Esporte</title>
+<style>
+  :root{
+    --navy:#174a6e;
+    --navy2:#123451;
+    --blue:#e8f1f7;
+    --blue2:#f4f8fb;
+    --green:#dcefe5;
+    --green2:#e6f3eb;
+    --red:#f7e8e8;
+    --red2:#f7e8e8;
+    --amber:#c59a42;
+    --amber2:#fff1b8;
+    --purple:#7b8da6;
+    --purple2:#ede9fe;
+    --ink:#243746;
+    --muted:#64748b;
+    --white:#fff;
+    --border:#d6e0e7;
+    --ok:#149954;
+    --shadow:0 8px 24px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:#f3f6f9;
+    color:var(--ink);
+  }
+  .wrap{max-width:1400px;margin:auto;padding:24px}
+  .hero{
+    background:linear-gradient(135deg,var(--navy2),var(--navy));
+    color:#fff;
+    border-radius:20px;
+    padding:24px 26px;
+    box-shadow:var(--shadow);
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    align-items:center;
+  }
+  .hero h1{margin:0 0 8px;font-size:clamp(24px,3vw,38px)}
+  .hero p{margin:0;opacity:.9}
+  .badge-deadline{
+    background:#fff;color:var(--navy2);font-weight:800;
+    border-radius:14px;padding:14px 18px;text-align:center;min-width:180px
+  }
+  .badge-deadline small{display:block;font-weight:600;color:#60798a;margin-bottom:4px}
+  .controls{
+    margin-top:18px;background:#fff;border-radius:18px;padding:16px 18px;
+    box-shadow:var(--shadow);display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:12px;
+  }
+  label{font-size:12px;font-weight:700;color:#526675;display:block;margin-bottom:6px}
+  input,select,button{
+    width:100%;border:1px solid #bfd0da;border-radius:10px;padding:10px 12px;
+    font:inherit;background:#fff;color:var(--ink)
+  }
+  input:focus,select:focus{outline:3px solid rgba(11,79,108,.12);border-color:var(--navy)}
+  .switchline{display:flex;align-items:center;gap:8px;height:42px}
+  .switchline input{width:auto}
+  .cards{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:18px 0
+  }
+  .card{
+    background:#fff;border-radius:18px;padding:18px;box-shadow:var(--shadow);min-height:120px
+  }
+  .card .k{font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:800;color:#6b7e8c}
+  .card .v{font-size:32px;font-weight:900;margin-top:8px;color:var(--navy2)}
+  .card .s{font-size:12px;color:#748796;margin-top:3px}
+  .card.focus{
+    background:linear-gradient(135deg,#103e57,#0b4f6c);
+    color:white
+  }
+  .card.focus .k,.card.focus .s{color:#d7eef8}
+  .card.focus .v{color:white;font-size:38px}
+  .progressbox{
+    background:#fff;border-radius:18px;padding:16px 18px;box-shadow:var(--shadow);margin-bottom:18px
+  }
+  .progressrow{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+  .track{height:14px;background:#dce7ed;border-radius:999px;overflow:hidden}
+  .bar{height:100%;width:0;background:linear-gradient(90deg,#18a35b,#6fd78f);transition:.25s}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 16px}
+  .legend span{font-size:12px;font-weight:700;border-radius:999px;padding:6px 10px}
+  .lg-work{background:var(--blue);color:#16445c}
+  .lg-weekend{background:var(--red2);color:#b01216}
+  .lg-holiday{background:var(--amber2);color:#8a6500}
+  .lg-point{background:var(--purple2);color:#5b34b5}
+  .tablebox{
+    background:#fff;border-radius:18px;padding:14px;box-shadow:var(--shadow);overflow:hidden
+  }
+  .tablehead{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 2px 12px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  button{cursor:pointer;font-weight:800}
+  .btn-primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .btn-light{background:#edf5f8;color:var(--navy2)}
+  table{border-collapse:separate;border-spacing:0;width:100%;min-width:880px}
+  thead th{
+    position:sticky;top:0;z-index:2;background:var(--navy);color:white;
+    padding:10px 9px;font-size:12px;border-right:1px solid rgba(255,255,255,.15)
+  }
+  thead th:first-child{border-radius:10px 0 0 0}
+  thead th:last-child{border-radius:0 10px 0 0}
+  tbody td{
+    padding:7px 9px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+    font-size:13px
+  }
+  tbody tr.work td{background:var(--blue)}
+  tbody tr.weekend td{background:var(--red2);color:#5b3434}
+  tbody tr.holiday td{background:var(--amber2)}
+  tbody tr.point td{background:var(--purple2)}
+  tbody td.month{
+    background:var(--green)!important;color:#163600!important;font-weight:900;text-align:center
+  }
+  tbody tr.weekend td.month{background:var(--green)!important}
+  .status{font-weight:800}
+  .minutes{
+    width:92px;padding:6px 8px;border-radius:7px;text-align:right;background:rgba(255,255,255,.82)
+  }
+  .todaymark{box-shadow:inset 4px 0 0 #0c789f}
+  .foot{
+    margin-top:14px;color:#627787;font-size:12px;line-height:1.55
+  }
+  .notice{
+    margin-top:14px;border-left:5px solid var(--amber);background:#fff9dc;padding:11px 14px;border-radius:10px;
+    font-size:13px
+  }
+  @media(max-width:1050px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .controls{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:650px){
+    .wrap{padding:12px}
+    .hero{align-items:flex-start;flex-direction:column}
+    .badge-deadline{width:100%}
+    .cards,.controls{grid-template-columns:1fr}
+    .card.focus{order:-1}
+    .tablebox{overflow:auto}
+    .actions{width:100%}
+    .actions button{flex:1}
+  }
+  @media print{
+    body{background:white}
+    .wrap{max-width:none;padding:0}
+    .controls,.actions{display:none!important}
+    .hero,.card,.progressbox,.tablebox{box-shadow:none}
+    .tablebox{overflow:visible}
+    table{min-width:0}
+  }
+
+  .profilebox{margin-top:18px;background:#fff;border:1px solid #e0e7ed;border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+  .profile-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .profile-heading h2{margin:0 0 5px;font-size:20px;color:var(--navy2)}
+  .profile-heading p,.profile-hint{margin:0;color:var(--muted);font-size:13px}
+  .profile-photo,.profile-initials{width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid #e1eaf0}
+  .profile-initials{display:flex;align-items:center;justify-content:center;background:#e8f1f7;color:var(--navy);font-size:27px;font-weight:800}
+  .profile-fields{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:14px}
+  .profile-save button{margin-top:0}\n  .profile-actions{display:flex;gap:8px;flex-wrap:wrap}\n  .profile-actions button{flex:1}\n  .field-help{display:block;margin-top:5px;color:var(--muted);font-size:11px}\n  .profile-fields input:disabled,.profile-fields select:disabled{background:#f1f4f6;color:#5f6f7a;cursor:not-allowed;border-color:#d9e1e6}\n  .profile-fields input[type=file]:disabled{opacity:.65}
+  .profile-hint{margin-top:14px}
+  .ministry-footer img{display:block;max-width:min(100%,560px);max-height:190px;object-fit:contain}
+  @media(max-width:850px){.profile-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:550px){.profile-fields{grid-template-columns:1fr}.profile-head{align-items:flex-start}.profile-photo,.profile-initials{width:62px;height:62px;flex-shrink:0}}
+
+
+  /* Identidade visual inspirada no portal gov.br mostrado como referência */
+  :root{
+    --navy:#1351b4;
+    --navy2:#123b76;
+    --blue:#edf4ff;
+    --blue2:#f6f9ff;
+    --green:#e7f4ec;
+    --green2:#eff8f2;
+    --red:#fff0ef;
+    --red2:#fff0ef;
+    --amber:#ffcd07;
+    --amber2:#fff7d6;
+    --purple:#5b8def;
+    --purple2:#edf2ff;
+    --ink:#202b3c;
+    --muted:#5d6b82;
+    --border:#dce3ed;
+    --ok:#16804a;
+    --shadow:0 2px 8px rgba(20,40,80,.10);
+  }
+  body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:var(--ink)}
+  .wrap{max-width:1320px;padding:0 24px 28px}
+  .gov-header{margin:0 auto 26px;padding:18px 6px 0;background:#fff}
+  .gov-topline{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:54px;border-top:1px solid #e6e9ef;border-bottom:1px solid #e6e9ef}
+  .gov-brand{display:flex;align-items:center;gap:20px;min-width:0}
+  .gov-logo{font-size:35px;letter-spacing:-2px;font-weight:800;color:#1351b4;line-height:1}
+  .gov-logo span{color:#ffcd07}
+  .gov-separator{height:34px;width:1px;background:#c8d0dc}
+  .gov-presidency{font-size:13px;color:#29384d;white-space:nowrap}
+  .gov-links{display:flex;gap:24px;align-items:center;color:#1351b4;font-size:13px;font-weight:600}
+  .institution-row{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:22px 0 8px}
+  .institution-title{display:flex;align-items:center;gap:12px;color:#1351b4}
+  .menu-mark{font-size:25px;line-height:1;font-weight:bold}
+  .institution-title div{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+  .institution-overline{font-size:18px;font-weight:400}
+  .institution-title strong{font-size:25px;font-weight:700;letter-spacing:-.4px}
+  .institution-tag{border:1px solid #dce3ed;border-radius:4px;padding:11px 14px;color:#1351b4;font-size:11px;font-weight:700;letter-spacing:.06em;white-space:nowrap}
+  .institution-tag span{color:#ffcd07;margin:0 5px}
+  .hero{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:22px;border-radius:0;background:#1351b4;color:#fff;padding:28px 32px;margin-bottom:20px;box-shadow:none;border-left:8px solid #ffcd07}
+  .hero:after{content:"";position:absolute;right:-30px;top:-48px;width:170px;height:170px;border:24px solid rgba(255,205,7,.9);transform:rotate(45deg);pointer-events:none}
+  .hero h1{margin:4px 0 8px;font-size:clamp(28px,3vw,38px);font-weight:700;letter-spacing:-.6px}
+  .hero p{margin:0;opacity:.96;font-size:15px}
+  .hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;color:#ffdf56}
+  .badge-deadline{position:relative;z-index:1;background:#fff;color:#1351b4;border-radius:3px;padding:14px 18px;text-align:center;min-width:190px;border-bottom:5px solid #ffcd07}
+  .badge-deadline small{color:#5d6b82}
+  .profilebox,.controls,.card,.progressbox,.tablebox{border:1px solid #e1e7ef;border-radius:5px;box-shadow:var(--shadow)}
+  .profilebox{margin-top:0;padding:22px;border-top:4px solid #ffcd07}
+  .profile-heading h2{color:#1351b4;font-size:21px}
+  .profile-initials{background:#edf4ff;color:#1351b4;border-color:#d5e4ff}
+  label{color:#34445b;font-size:12px}
+  input,select,button{border:1px solid #cbd5e1;border-radius:4px;font-size:14px}
+  input:focus,select:focus{outline:3px solid rgba(19,81,180,.15);border-color:#1351b4}
+  .btn-primary{background:#1351b4;color:#fff;border-color:#1351b4;border-radius:4px}
+  .btn-primary:hover{background:#0d3f91}
+  .btn-light{background:#f2f6fc;color:#1351b4;border-color:#cbd8eb;border-radius:4px}
+  .controls{display:none!important;border-radius:5px;box-shadow:var(--shadow);gap:14px}
+  .cards{gap:12px}
+  .card{border-radius:5px;border-top:4px solid #d5e4ff;box-shadow:var(--shadow)}
+  .card .k{color:#5d6b82}
+  .card .v{color:#1351b4}
+  .card.focus{background:#1351b4;border-top:4px solid #ffcd07;border-radius:5px}
+  .progressbox{border-radius:5px}
+  .track{height:12px;background:#e9eef6;border-radius:2px}
+  .bar{background:linear-gradient(90deg,#1351b4,#5b8def);border-radius:2px}
+  .tablebox{border-radius:5px}
+  .legend span{border-radius:3px}
+  .lg-work{background:#edf4ff;color:#1351b4}
+  .lg-weekend{background:#fff0ef;color:#9d3434}
+  .lg-holiday{background:#fff7d6;color:#755900}
+  .lg-point{background:#edf2ff;color:#355da8}
+  thead th{background:#1351b4}
+  tbody tr.work td{background:#f6f9ff}
+  tbody tr.weekend td{background:#fff5f4;color:#7b3434}
+  tbody tr.holiday td{background:#fff9e6}
+  tbody tr.point td{background:#f1f4ff}
+  tbody td.month{background:#e7f4ec!important;color:#24533a!important}
+  .notice{border-left:5px solid #ffcd07;background:#fff9e4;border-radius:3px}
+  @media(max-width:760px){
+    .wrap{padding:0 12px 20px}
+    .gov-header{padding-top:10px;margin-bottom:16px}
+    .gov-topline{align-items:flex-start;flex-direction:column;padding:12px 0;gap:12px}
+    .gov-links{gap:14px;flex-wrap:wrap;font-size:12px}
+    .gov-logo{font-size:30px}
+    .gov-presidency{font-size:12px}
+    .institution-row{align-items:flex-start;flex-direction:column;padding-top:16px}
+    .institution-tag{white-space:normal}
+    .hero{padding:24px 20px;flex-direction:column;align-items:flex-start}
+    .badge-deadline{width:100%;text-align:left}
+    .hero:after{right:-85px;top:-65px}
+  }
+  @media print{
+    .gov-links,.institution-tag,.menu-mark{display:none!important}
+    .hero:after{display:none}
+    .gov-header{margin-bottom:12px}
+  }
+\n
+  .hero-brand-logo{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;flex:0 0 190px;min-width:150px;min-height:105px;background:transparent;padding:8px 12px}
+  .hero-brand-logo img{display:block;width:100%;max-width:170px;height:auto;object-fit:contain;background:transparent}
+  @media(max-width:760px){.hero-brand-logo{align-self:flex-end;flex-basis:auto;width:150px;min-height:75px}.hero-brand-logo img{max-width:140px}}
+
+
+  .card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:30px}
+  .card-icon{display:flex;align-items:center;justify-content:center;width:38px;height:38px;flex:0 0 38px;border-radius:11px;background:#edf4ff;color:#1351b4}
+  .card-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .icon-check{background:#e7f4ec;color:#16804a}
+  .icon-hourglass{background:#fff7df;color:#9a6b00}
+  .icon-calendar{background:#edf2ff;color:#4b64a1}
+  .icon-clock{background:rgba(255,255,255,.15);color:#ffdf56}
+  .card.focus .card-icon{background:rgba(255,255,255,.15)}
+  .track{position:relative;overflow:visible;margin:16px 10px 8px 0}
+  .bar{border-radius:999px}
+  .progress-marker{position:absolute;top:50%;left:0%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);border:3px solid #fff;border-radius:50%;background:#1351b4;color:#fff;box-shadow:0 2px 7px rgba(16,50,100,.25);transition:left .3s ease;z-index:2}
+  .progress-marker svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+  .controls{display:none!important}
+  .hero-brand-logo{display:none!important}
+  @media(max-width:650px){.card-icon{width:34px;height:34px;flex-basis:34px}.progress-marker{width:27px;height:27px}}
+
+
+  /* PWA e usabilidade móvel */
+  html{min-height:100%;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{min-height:100dvh;padding-bottom:env(safe-area-inset-bottom)}
+  button,input,select{touch-action:manipulation}
+  input,select,button{min-height:44px}
+  .install-app-btn{margin-top:14px;width:auto;min-width:170px;background:#fff;color:#1351b4;border:2px solid #ffcd07}
+  .install-app-btn[hidden]{display:none!important}
+  .tablebox{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+  .tablehead{flex-wrap:wrap}
+  .tablehead h2{margin:0}
+  .minutes{min-height:40px;font-size:16px}
+  .profile-fields input,.profile-fields select{font-size:16px}
+  .progressbox,.profilebox,.card,.tablebox{min-width:0}
+  .progressrow{flex-wrap:wrap}
+  .track{position:relative}
+  @media(max-width:760px){
+    .wrap{width:100%;padding:12px 10px 24px}
+    .hero{padding:20px 18px;border-radius:12px;gap:12px}
+    .hero h1{font-size:clamp(25px,7vw,34px);line-height:1.15}
+    .hero p{font-size:14px;line-height:1.45}
+    .profilebox{padding:16px;border-radius:10px}
+    .profile-head{gap:12px}
+    .profile-heading h2{font-size:18px}
+    .profile-heading p{line-height:1.4}
+    .profile-fields{grid-template-columns:minmax(0,1fr);gap:12px}
+    .profile-fields>div{min-width:0}
+    .profile-fields input,.profile-fields select{width:100%;max-width:100%}
+    .profile-actions{display:grid;grid-template-columns:1fr}
+    .profile-actions button{width:100%}
+    .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+    .card{padding:13px;min-height:108px;border-radius:10px}
+    .card .k{font-size:10px;line-height:1.3;letter-spacing:.02em}
+    .card .v{font-size:clamp(22px,6vw,29px);overflow-wrap:anywhere}
+    .card.focus .v{font-size:clamp(24px,6vw,31px)}
+    .card .s{font-size:11px;line-height:1.35}
+    .card-icon{width:30px;height:30px;flex-basis:30px}
+    .progressbox{padding:14px;border-radius:10px;margin-bottom:12px}
+    .progressrow{font-size:13px}
+    .track{height:16px}
+    .progress-marker{width:28px;height:28px}
+    .tablebox{padding:10px;border-radius:10px}
+    .tablehead{align-items:flex-start}
+    .tablehead .actions{width:100%}
+    .tablehead .actions button{flex:1}
+    .tablebox table{min-width:820px}
+    .tablebox thead th{padding:10px 8px;font-size:11px}
+    .tablebox tbody td{padding:7px 8px;font-size:12px}
+    .minutes{width:78px;padding:7px 5px}
+    .legend{gap:6px}
+    .legend span{font-size:10px;padding:6px 8px}
+    .notice{font-size:12px;line-height:1.45}
+    .foot{font-size:11px}
+  }
+  @media(max-width:380px){
+    .cards{grid-template-columns:1fr}
+    .card{min-height:95px}
+    .profile-photo,.profile-initials{width:54px;height:54px}
+    .wrap{padding-left:8px;padding-right:8px}
+  }
+
+
+  .hours-entry{width:110px;max-width:100%;font-variant-numeric:tabular-nums;text-align:center}
+  .hours-entry.invalid-time{border-color:#b42318;background:#fff4f2;outline-color:#b42318}
+  .profile-actions #editProfileBtn{flex:0 0 auto;width:auto;min-width:100px;min-height:34px;padding:6px 12px;font-size:12px}
+  .profile-fields>div[hidden]{display:none!important}
+  @media(max-width:760px){.hours-entry{width:100px;font-size:16px}.profile-actions #editProfileBtn{min-height:36px}}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <div class="hero-eyebrow">ACOMPANHAMENTO INDIVIDUAL</div><h1>Controle de horas</h1>
+      <p id="welcomeText">Acompanhe seu saldo e planeje a compensação diária até 17/12/2026.</p>
+    </div>
+  </section>
+
+
+  <section class="profilebox" aria-labelledby="profileTitle">
+    <div class="profile-head">
+      <img id="profilePreview" class="profile-photo" alt="Foto do perfil" hidden>
+      <div id="profileInitials" class="profile-initials" aria-hidden="true">?</div>
+      <div class="profile-heading">
+        <h2 id="profileTitle">Seu perfil</h2>
+        <p id="profileSummary">Cadastre seu nome, saldo inicial e data de início.</p>
+      </div>
+    </div>
+    <div class="profile-fields">
+      <div><label for="personName">Nome da pessoa</label><input id="personName" type="text" maxlength="100" placeholder="Digite seu nome" autocomplete="name"></div>
+      <div><label for="startingHours">Horas que já possui</label><input id="startingHours" type="text" inputmode="numeric" placeholder="18:05" value="00:00" aria-describedby="startingHoursHelp"><small id="startingHoursHelp" class="field-help">Informe horas e minutos, por exemplo 18:05.</small></div>
+      <div><label for="startDate">Data de início do acompanhamento</label><input id="startDate" type="date" min="2026-01-01" max="2026-12-17" value="2026-10-13"></div>
+      <div><label for="recess">Semana de recesso</label><select id="recess"><option value="christmas">Natal — 21 a 25/12/2026</option><option value="newyear">Ano Novo — 28/12/2026 a 01/01/2027</option></select></div>
+      <div><label for="profilePhoto">Sua foto (opcional)</label><input id="profilePhoto" type="file" accept="image/*"></div>
+      <div class="profile-save"><label>&nbsp;</label><div class="profile-actions"><button class="btn-primary" id="saveProfileBtn" type="button">Salvar perfil</button><button class="btn-light" id="editProfileBtn" type="button" hidden>Editar perfil</button></div></div>
+    </div>
+    <p class="profile-hint">O nome, a foto e as configurações ficam salvos neste navegador e neste dispositivo.</p>
+  </section>
+
+  <section class="controls">
+    <div>
+      <label>Meta total (horas)</label>
+      <input id="targetHours" type="number" min="0" step="0.25" value="28">
+    </div>
+    <div>
+      <label>Data de acompanhamento</label>
+      <input id="refDate" type="date" min="2026-01-01" max="2026-12-17" value="2026-10-13">
+    </div>
+    <div>
+      <label>28/10 — ponto facultativo</label>
+      <div class="switchline">
+        <input id="excludePoint" type="checkbox" checked>
+        <span>Excluir do cálculo</span>
+      </div>
+    </div>
+    <div>
+      <label>Adicionar ajuste já pago (min)</label>
+      <input id="globalPaid" type="number" min="0" step="1" value="0">
+    </div>
+    <div>
+      <label>Ações rápidas</label>
+      <button class="btn-light" id="resetBtn">Limpar lançamentos</button>
+    </div>
+  </section>
+
+  <section class="cards">
+    <div class="card">
+      <div class="card-top"><span class="k">Meta</span><span class="card-icon icon-target" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></span></div>
+      <div class="v" id="targetCard">28h</div>
+      <div class="s" id="targetMinCard">1.680 minutos</div>
+    </div>
+    <div class="card">
+      <div class="card-top"><span class="k">Já realizado</span><span class="card-icon icon-check" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7.5 12.3 3 3 6.2-6.4"/></svg></span></div>
+      <div class="v" id="paidCard">0h</div>
+      <div class="s" id="paidMinCard">0 minutos</div>
+    </div>
+    <div class="card">
+      <div class="card-top"><span class="k">Falta compensar</span><span class="card-icon icon-hourglass" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12M6 21h12M7 3c0 5 5 5.5 5 9s-5 4-5 9M17 3c0 5-5 5.5-5 9s5 4 5 9"/></svg></span></div>
+      <div class="v" id="remainingCard">28h</div>
+      <div class="s" id="remainingMinCard">1.680 minutos</div>
+    </div>
+    <div class="card">
+      <div class="card-top"><span class="k">Dias úteis restantes</span><span class="card-icon icon-calendar" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M7.5 3v4M16.5 3v4M3.5 9.5h17M8 13h2M14 13h2M8 16.5h2"/></svg></span></div>
+      <div class="v" id="daysCard">51</div>
+      <div class="s">até 17/12/2026</div>
+    </div>
+    <div class="card focus">
+      <div class="card-top"><span class="k">Você precisa fazer por dia</span><span class="card-icon icon-clock" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6.5v5.8l4 2.2"/></svg></span></div>
+      <div class="v" id="dailyCard">32m 56s</div>
+      <div class="s" id="dailyDecimal">média necessária por dia útil</div>
+    </div>
+  </section>
+
+  <section class="progressbox">
+    <div class="progressrow">
+      <strong>Progresso da meta</strong>
+      <strong id="progressText">0%</strong>
+    </div>
+    <div class="track"><div class="bar" id="progressBar"></div><span class="progress-marker" id="progressMarker" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19 7"/></svg></span></div>
+  </section>
+
+  <section class="tablebox">
+    <div class="tablehead">
+      <div>
+        <strong>Calendário diário</strong>
+        <div class="legend">
+          <span class="lg-work">Dia útil</span>
+          <span class="lg-weekend">Fim de semana</span>
+          <span class="lg-holiday">Feriado</span>
+          <span class="lg-point">Ponto facultativo</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" onclick="window.print()">Imprimir</button>
+      </div>
+    </div>
+
+    <div style="overflow:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Mês</th>
+            <th>Data</th>
+            <th>Dia da semana</th>
+            <th>Status</th>
+            <th>Horas realizadas (HH:MM)</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="notice">
+      <strong>Feriados considerados no período:</strong>
+      12/10 (Nossa Senhora Aparecida), 02/11 (Finados), 15/11 (Proclamação da República — domingo),
+      20/11 (Dia Nacional de Zumbi e da Consciência Negra) e 30/11 (Dia do Evangélico — feriado local do DF).
+      O dia 28/10 é ponto facultativo e pode ser incluído ou excluído pelo controle acima.
+    </div>
+    <div class="foot">
+      Base do calendário: Decreto nº 48.117, de 30/12/2025, do Distrito Federal. Os lançamentos ficam salvos
+      no navegador deste dispositivo. Se a sua unidade adotar calendário próprio, ajuste o ponto facultativo
+      conforme necessário.
+    </div>
+  </section>
+</div>
+
+<script>
+const DEFAULT_START = '2026-10-13';
+const END = new Date('2026-12-17T12:00:00');
+
+const holidays = {
+  '2026-10-12':'Nossa Senhora Aparecida',
+  '2026-11-02':'Finados',
+  '2026-11-15':'Proclamação da República',
+  '2026-11-20':'Dia Nacional de Zumbi e da Consciência Negra',
+  '2026-11-30':'Dia do Evangélico — DF'
+};
+const pointFac = {'2026-10-28':'Dia do Servidor Público'};
+
+const monthShort = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const weekdays = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+
+const $ = s => document.querySelector(s);
+const tbody = $('#tbody');
+
+function iso(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function br(d){ return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+function minToHHMM(mins){
+  mins = Math.max(0, Math.round(mins));
+  const h=Math.floor(mins/60), m=mins%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+function parseHHMM(value){
+  const raw=String(value??'').trim().replace(/\s+/g,'');
+  if(!raw) return 0;
+  const match=raw.match(/^(\d{1,4}):(\d{1,2})$/);
+  if(match){
+    const hours=Number(match[1]), minutes=Number(match[2]);
+    if(minutes>59) return 0;
+    return hours*60+minutes;
+  }
+  // Compatibility with previous versions where daily values were stored as numeric minutes.
+  if(/^\d+(?:[.,]\d+)?$/.test(raw)) return Math.max(0,Number(raw.replace(',','.'))||0);
+  return 0;
+}
+function formatStoredEntry(value){
+  if(value==null || value==='') return '';
+  const raw=String(value).trim();
+  if(raw.includes(':')) return raw;
+  const n=Number(raw);
+  return Number.isFinite(n) && n>0 ? minToHHMM(n) : '';
+}
+function secondsToText(minutes){
+  if(!isFinite(minutes) || minutes < 0) return '—';
+  const totalSec=Math.round(minutes*60);
+  const m=Math.floor(totalSec/60), s=totalSec%60;
+  return `${m}m ${String(s).padStart(2,'0')}s`;
+}
+function fmt(n,dec=0){
+  return n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+}
+function isWeekend(d){ return d.getDay()===0 || d.getDay()===6; }
+function isEligible(d){
+  const key=iso(d);
+  if(isWeekend(d)) return false;
+  if(holidays[key]) return false;
+  if(pointFac[key] && $('#excludePoint').checked) return false;
+  return true;
+}
+
+let profileLocked = false;
+function parseHoursMinutes(value){
+  const raw=String(value??'').trim().replace(/\s+/g,'');
+  if(!raw) return 0;
+  if(/^\d{1,4}:\d{1,2}$/.test(raw)){
+    const parts=raw.split(':');
+    const hours=Number(parts[0]), minutes=Number(parts[1]);
+    if(minutes>59) return 0;
+    return hours*60+minutes;
+  }
+  // Compatibility with previous saved decimal-hour values.
+  const decimal=Number(raw.replace(',','.'));
+  return Number.isFinite(decimal)&&decimal>=0 ? decimal*60 : 0;
+}
+function minutesToHoursMinutes(total){
+  total=Math.max(0,Math.round(total));
+  return `${Math.floor(total/60)}:${String(total%60).padStart(2,'0')}`;
+}
+function setProfileLocked(locked){
+  profileLocked=locked;
+  ['personName','startingHours','startDate','recess','profilePhoto'].forEach(id=>{
+    const el=$('#'+id); if(el) el.disabled=locked;
+  });
+  const recessField=$('#recess').parentElement;
+  const photoField=$('#profilePhoto').parentElement;
+  if(recessField) recessField.hidden=locked;
+  if(photoField) photoField.hidden=locked;
+  $('#saveProfileBtn').hidden=locked;
+  $('#editProfileBtn').hidden=!locked;
+  $('#profileTitle').textContent=locked?'Perfil salvo':'Editar perfil';
+}
+
+let profilePhotoData = '';
+function getSaved(){
+  try{return JSON.parse(localStorage.getItem('controle28h_2026')||'{}')}catch(e){return{}}
+}
+function saveState(){
+  const values={};
+  document.querySelectorAll('.minutes').forEach(i=>values[i.dataset.date]=i.value);
+  const data={
+    targetHours:$('#targetHours').value,
+    refDate:$('#refDate').value,
+    excludePoint:$('#excludePoint').checked,
+    globalPaid:$('#globalPaid').value,
+    values,
+    profile:{
+      name:$('#personName').value,
+      startingHours:minutesToHoursMinutes(parseHoursMinutes($('#startingHours').value)),
+      startDate:$('#startDate').value,
+      recess:$('#recess').value,
+      photo:profilePhotoData
+    }
+  };
+  try { localStorage.setItem('controle28h_2026',JSON.stringify(data)); }
+  catch(e) { alert('Não foi possível salvar. A foto pode ser muito grande; escolha uma imagem menor.'); }
+}
+function loadState(){
+  const s=getSaved();
+  if(s.targetHours!=null) $('#targetHours').value=s.targetHours;
+  if(s.refDate) $('#refDate').value=s.refDate;
+  if(s.excludePoint!=null) $('#excludePoint').checked=s.excludePoint;
+  if(s.globalPaid!=null) $('#globalPaid').value=s.globalPaid;
+  const p=s.profile||{};
+  $('#personName').value=p.name||'';
+  $('#startingHours').value=(p.startingHours!=null && String(p.startingHours).includes(':')) ? p.startingHours : minutesToHoursMinutes(parseHoursMinutes(p.startingHours??'0'));
+  $('#startDate').value=p.startDate||s.refDate||DEFAULT_START;
+  $('#refDate').value=s.refDate||p.startDate||DEFAULT_START;
+  $('#recess').value=p.recess||'christmas';
+  profilePhotoData=p.photo||'';
+  renderProfile();
+  setProfileLocked(!!(p.name && String(p.name).trim()));
+  return s.values||{};
+}
+function buildTable(){
+  const oldValues={};
+  document.querySelectorAll('.minutes').forEach(i=>oldValues[i.dataset.date]=i.value);
+  const saved=Object.keys(oldValues).length?oldValues:(getSaved().values||{});
+
+  tbody.innerHTML='';
+  for(let d=new Date((($('#startDate').value)||DEFAULT_START)+'T12:00:00'); d<=END; d.setDate(d.getDate()+1)){
+    const current=new Date(d);
+    const key=iso(current);
+    const weekend=isWeekend(current);
+    const holiday=!!holidays[key];
+    const point=!!pointFac[key];
+
+    let cls='work', status='Dia útil', note='';
+    if(weekend){cls='weekend';status='Fim de semana';}
+    if(holiday){cls='holiday';status='Feriado';note=holidays[key];}
+    if(point){cls='point';status=$('#excludePoint').checked?'Ponto facultativo':'Dia útil (incluído)';note=pointFac[key];}
+
+    const tr=document.createElement('tr');
+    tr.className=cls;
+    tr.dataset.date=key;
+    tr.innerHTML=`
+      <td class="month">${monthShort[current.getMonth()]}/26</td>
+      <td>${br(current)}</td>
+      <td>${weekdays[current.getDay()]}</td>
+      <td class="status">${status}</td>
+      <td>
+        <input class="minutes hours-entry" type="text" inputmode="numeric" autocomplete="off"
+          aria-label="Horas realizadas em ${br(current)}" placeholder="HH:MM"
+          maxlength="7" data-date="${key}"
+          value="${formatStoredEntry(saved[key])}" ${(!isEligible(current))?'disabled':''}>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+  document.querySelectorAll('.minutes').forEach(i=>{
+    i.addEventListener('input',()=>{i.setCustomValidity('');update();saveState();});
+    i.addEventListener('blur',()=>{
+      const value=i.value.trim();
+      if(value && !/^\d{1,4}:\d{1,2}$/.test(value) || value && Number(value.split(':')[1])>59){
+        i.setCustomValidity('Use o formato HH:MM, por exemplo 08:18.');
+        i.reportValidity();
+      } else i.setCustomValidity('');
+    });
+  });
+  update();
+}
+function update(){
+  const targetH=parseFloat($('#targetHours').value)||0;
+  const targetM=targetH*60;
+  const globalPaid=parseFloat($('#globalPaid').value)||0;
+  let rowPaid=0;
+
+  document.querySelectorAll('.minutes').forEach(i=>{
+    const value=i.value.trim();
+    const v=parseHHMM(value);
+    rowPaid+=v;
+    const valid=!value || /^\d{1,4}:\d{1,2}$/.test(value) && Number(value.split(':')[1])<=59;
+    i.setCustomValidity(valid?'':'Use o formato HH:MM, por exemplo 08:18.');
+    i.classList.toggle('invalid-time',!valid);
+  });
+
+  const startingPaid=parseHoursMinutes($('#startingHours').value);
+   const paid=startingPaid+globalPaid+rowPaid;
+  const remaining=Math.max(0,targetM-paid);
+  const ref=new Date($('#refDate').value+'T12:00:00');
+
+  let remainingDays=0;
+  for(let d=new Date((($('#startDate').value)||DEFAULT_START)+'T12:00:00'); d<=END; d.setDate(d.getDate()+1)){
+    const current=new Date(d);
+    const profileStart=new Date((($('#startDate').value)||DEFAULT_START)+'T12:00:00');
+     if(current>=ref && current>=profileStart && isEligible(current)) remainingDays++;
+  }
+  const daily=remainingDays>0?remaining/remainingDays:0;
+  const pct=targetM>0?Math.min(100,(paid/targetM)*100):0;
+
+  $('#targetCard').textContent=`${fmt(targetH, targetH%1?2:0)}h`;
+  $('#targetMinCard').textContent=`${fmt(targetM)} minutos`;
+  $('#paidCard').textContent=minToHHMM(paid).replace(' 00min','');
+  $('#paidMinCard').textContent=`${fmt(paid)} minutos`;
+  $('#remainingCard').textContent=minToHHMM(remaining).replace(' 00min','');
+  $('#remainingMinCard').textContent=`${fmt(remaining)} minutos`;
+  $('#daysCard').textContent=remainingDays;
+  $('#dailyCard').textContent=remaining===0?'Meta concluída':secondsToText(daily);
+  $('#dailyDecimal').textContent=remaining===0?'28 horas compensadas':`≈ ${fmt(daily,2)} minutos/dia`;
+  $('#progressText').textContent=`${fmt(pct,1)}%`;
+  $('#progressBar').style.width=`${pct}%`;
+  const marker=$('#progressMarker');
+  if(marker) marker.style.left=`${Math.min(100,Math.max(0,pct))}%`;
+  $('#welcomeText').textContent = $('#personName').value.trim()
+    ? `Acompanhamento de ${$('#personName').value.trim()} — calendário até 17/12/2026.`
+    : 'Acompanhe seu saldo e planeje a compensação diária até 17/12/2026.';
+  $('#profileSummary').textContent = $('#personName').value.trim()
+    ? `${$('#personName').value.trim()} · início em ${br(new Date($('#startDate').value+'T12:00:00'))} · recesso: ${$('#recess').value==='christmas'?'Natal (21 a 25/12/2026)':'Ano Novo (28/12/2026 a 01/01/2027)'}`
+    : 'Cadastre seu nome, saldo inicial e data de início.';
+
+  document.querySelectorAll('tbody tr').forEach(tr=>{
+    tr.classList.toggle('todaymark',tr.dataset.date===$('#refDate').value);
+  });
+}
+function renderProfile(){
+  const name=$('#personName').value.trim();
+  $('#profileInitials').textContent=name ? name.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase() : '?';
+  if(profilePhotoData){$('#profilePreview').src=profilePhotoData;$('#profilePreview').hidden=false;$('#profileInitials').hidden=true;}
+  else{$('#profilePreview').hidden=true;$('#profileInitials').hidden=false;}
+}
+$('#profilePhoto').addEventListener('change', e=>{
+  const file=e.target.files&&e.target.files[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){alert('Selecione um arquivo de imagem.');return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const max=480, scale=Math.min(1,max/Math.max(img.width,img.height));
+      canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      profilePhotoData=canvas.toDataURL('image/jpeg',0.82);
+      renderProfile();
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+$('#saveProfileBtn').addEventListener('click',()=>{
+  const name=$('#personName').value.trim();
+  if(!name){alert('Informe o nome da pessoa para salvar o perfil.');$('#personName').focus();return;}
+  if(!$('#startDate').value){alert('Escolha a data de início.');return;}
+  const hoursValue=$('#startingHours').value.trim().replace(/\s+/g,'');
+  const hhmmMatch=hoursValue.match(/^(\d{1,4}):(\d{1,2})$/);
+  const decimalMatch=hoursValue.match(/^\d+(?:[.,]\d+)?$/);
+  if(hoursValue && !hhmmMatch && !decimalMatch){
+    alert('Informe as horas no formato HH:MM, por exemplo 08:18 ou 18:05.');$('#startingHours').focus();return;
+  }
+  if(hhmmMatch && Number(hhmmMatch[2])>59){
+    alert('Os minutos devem estar entre 00 e 59. Exemplo válido: 08:18.');$('#startingHours').focus();return;
+  }
+  if($('#startDate').value>'2026-12-17'){alert('A data de início deve ser até 17/12/2026.');return;}
+  $('#refDate').min=$('#startDate').value;
+  $('#refDate').value=$('#startDate').value;
+  renderProfile();
+  setProfileLocked(true);
+  buildTable();
+  saveState();
+  alert('Perfil salvo neste navegador.');
+});
+$('#editProfileBtn').addEventListener('click',()=>{
+  setProfileLocked(false);
+  $('#personName').focus();
+});
+$('#personName').addEventListener('input',()=>{renderProfile();});
+$('#startDate').addEventListener('change',()=>{
+  $('#refDate').min=$('#startDate').value;
+  if($('#refDate').value<$('#startDate').value)$('#refDate').value=$('#startDate').value;
+});
+$('#recess').addEventListener('change',()=>{renderProfile();saveState();});
+$('#startingHours').addEventListener('input',()=>{
+  // Do not block typing while the user is midway through entering HH:MM.
+  $('#startingHours').setCustomValidity('');
+  update();saveState();
+});
+
+
+$('#targetHours').addEventListener('input',()=>{update();saveState();});
+$('#refDate').addEventListener('input',()=>{if($('#refDate').value<$('#startDate').value)$('#refDate').value=$('#startDate').value;update();saveState();});
+$('#globalPaid').addEventListener('input',()=>{update();saveState();});
+$('#excludePoint').addEventListener('change',()=>{buildTable();saveState();});
+$('#resetBtn').addEventListener('click',()=>{
+  if(confirm('Deseja apagar todos os minutos lançados?')){
+    localStorage.removeItem('controle28h_2026');
+    $('#targetHours').value=28;
+    $('#refDate').value=$('#startDate').value||DEFAULT_START;
+    $('#excludePoint').checked=true;
+    $('#globalPaid').value=0;
+    $('#startingHours').value=0;
+    buildTable();
+    saveState();
+  }
+});
+
+loadState();
+$('#refDate').min=$('#startDate').value||DEFAULT_START;
+if($('#refDate').value<$('#startDate').value)$('#refDate').value=$('#startDate').value;
+buildTable();
+
+
+</script>
+</body>
+</html>
